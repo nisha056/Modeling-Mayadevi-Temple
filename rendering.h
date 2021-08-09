@@ -1,4 +1,5 @@
 
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -54,12 +55,12 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
 
 // settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1280;
+const unsigned int SCR_HEIGHT = 800;
 
 
 // camera
-Camera camera(glm::vec3(0.0f, 5.0f, 20.0f));
+Camera camera(glm::vec3(-3.0f, 0.5f, 17.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -376,7 +377,7 @@ void Render::visualise()
         // Transformation matrices
         // -----------------------
         glm::mat4 projection(1);
-         projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
+         projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
          glm::mat4 view(1);
          view = camera.GetViewMatrix();
          ourShader.setMat4("projection", projection);
@@ -393,7 +394,7 @@ void Render::visualise()
             modelObject = glm::translate(modelObject, modelPosition[i]); // Translate it down a bit so it's at the center of the scene
             
             modelObject = glm::rotate(modelObject, glm::radians((float)modelAngle[i]), glm::vec3(0.0f, 1.0f, 0.0f));
-            modelObject = glm::scale(modelObject, modelScale[i]); // It's a bit too big for our scene, so scale it down
+            modelObject = glm::scale(modelObject, glm::vec3(4.0f, 4.0f, 4.0f)); 
             ourShader.setMat4("model", modelObject);
             models[i].Draw(ourShader);
             
@@ -408,7 +409,7 @@ void Render::visualise()
             model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
            
             
-            model = glm::scale(model, glm::vec3(0.03f, 0.05f, 1.8f)); // a smaller cube
+            model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f)); // a smaller cube
             lampShader.setMat4("model", model);
            
             glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -422,7 +423,7 @@ void Render::visualise()
 
             
 
-            model = glm::scale(model, glm::vec3(0.1f, 0.15f, 0.15f)); // a smaller cube
+            model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f)); // a smaller cube
             lampShader.setMat4("model", model);
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
