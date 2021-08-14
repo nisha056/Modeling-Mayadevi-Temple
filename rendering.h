@@ -1,5 +1,4 @@
 
-
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -18,35 +17,35 @@
 #include <vector>
 
 class Render
-    {
-    private:
-        GLFWwindow* window;
-        GLuint cubemapTexture;
-        Object* temple;
-        GLuint cubeVBO, cubeVAO, lightVAO, skyboxVAO, skyboxVBO;
-        vector<glm::vec3> modelPosition;
-        vector<glm::vec3> modelRotationVector;
-        vector<glm::vec3> modelScale;
-        vector<double> modelAngle;
-        vector<Model> models;
-        vector<glm::vec3> lampPosition;
-        vector<glm::vec3> lightPosition;
-        double w;
-        double l;
-        double h;
+{
+private:
+    GLFWwindow* window;
+    GLuint cubemapTexture;
+    Object* temple;
+    GLuint cubeVBO, cubeVAO, skyboxVAO, skyboxVBO, lampVAO;
+    vector<glm::vec3> modelPosition;
+    vector<glm::vec3> modelRotationVector;
+    vector<glm::vec3> modelScale;
+    vector<double> modelAngle;
+    vector<Model> models;
+    vector<glm::vec3> lampPosition;
+    vector<glm::vec3> lightPosition;
+    double w;
+    double l;
+    double h;
 
-    public:
-        Render(Object* temple);
-        ~Render();
-        void getSize();
-        void visualise();
-        GLuint loadCubemap(vector<std::string> faces);
-        void initializeVertex();
-        void setLampPosition();
-        void setLightPosition();
-        void initializeGlfw();
-        void getModels();
-    };
+public:
+    Render(Object* temple);
+    ~Render();
+    void getSize();
+    void visualise();
+    GLuint loadCubemap(vector<std::string> faces);
+    void initializeVertex();
+
+    void setLightPosition();
+    void initializeGlfw();
+    void getModels();
+};
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -60,7 +59,7 @@ const unsigned int SCR_HEIGHT = 800;
 
 
 // camera
-Camera camera(glm::vec3(-3.0f, 0.5f, 17.0f));
+Camera camera(glm::vec3(-3.0f, 1.0f, 17.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -250,37 +249,58 @@ void Render::initializeVertex()
 
     glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glGenVertexArrays(1, &lightVAO);
-    glBindVertexArray(lightVAO);
-    // we only need to bind to the cubeVBO, the container's cubeVBO's data already contains the correct data.
-    glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
-    // set the vertex attributes (only position data for our lamp)
+    glBindVertexArray(cubeVAO);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+
 
     glGenVertexArrays(1, &skyboxVAO);
     glGenBuffers(1, &skyboxVBO);
-    glBindVertexArray(skyboxVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
 
-    // we can make a call to the glBufferData function that copies the
-    //previously defined vertex data into the buffer's memory:
+
+    glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
+    glBindVertexArray(skyboxVAO);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    cout << "Successfully initialized vertexes" << endl;
+    glEnableVertexAttribArray(0);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // lamp VAO
+    glGenVertexArrays(1, &lampVAO);
+    glBindVertexArray(lampVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+    // note that we update the lamp's position attribute's stride to reflect the updated buffer data
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+
 }
 
 
 void Render::setLightPosition()
 {
-    lightPosition.push_back(glm::vec3(0.8,6,-5.1));
-    lightPosition.push_back(glm::vec3(-0.8, 6, -5.1));
+    lightPosition.push_back(glm::vec3(0.7, 0.2, 2));
+    lightPosition.push_back(glm::vec3(4.3, -5.3, -4));
 
-    lightPosition.push_back(glm::vec3(3.55, 2.1, -4.6));
-    lightPosition.push_back(glm::vec3(0, 40, 0));
+    lightPosition.push_back(glm::vec3(-5, 2, 5));
+    lightPosition.push_back(glm::vec3(0, 0, 40));
 }
+
 
 
 void Render::visualise()
@@ -294,7 +314,7 @@ void Render::visualise()
     Shader lampShader("lightvertex.vs", "lightfragment.fs"); //Light Shader
     Shader skyboxShader("skybox.vs", "skybox.fs");           //CubeMap Shader
 
-    
+    //setLampPosition();
     setLightPosition();
 
     //initiliaze vertex
@@ -309,6 +329,10 @@ void Render::visualise()
     ourShader.Bind();
     ourShader.setInt("material.diffuse", 0);
     ourShader.setInt("material.specular", 1);
+
+
+
+
     skyboxShader.Bind();
     skyboxShader.setInt("skybox", 0);
 
@@ -335,8 +359,9 @@ void Render::visualise()
         ourShader.setVec3("viewPos", camera.Position);
         ourShader.setFloat("material.shininess", 32.0f);
         // light properties
+
         ourShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
-        ourShader.setVec3("dirLight.ambient", 0.5f, 0.5f, 0.5f);
+        ourShader.setVec3("dirLight.ambient", 0.005f, 0.005f, 0.005f);
         ourShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
         ourShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
         // point light 1
@@ -355,10 +380,11 @@ void Render::visualise()
         ourShader.setFloat("pointLights[1].constant", 1.0f);
         ourShader.setFloat("pointLights[1].linear", 0.09);
         ourShader.setFloat("pointLights[1].quadratic", 0.032);
-        // // point light 3
+        // point light 3
         ourShader.setVec3("pointLights[2].position", lightPosition[2]);
         ourShader.setVec3("pointLights[2].ambient", 0.05f, 0.05f, 0.05f);
         ourShader.setVec3("pointLights[2].diffuse", 1.0f, 1.0f, 0.5f);
+
         ourShader.setVec3("pointLights[2].specular", 1.0f, 1.0f, 1.0f);
         ourShader.setFloat("pointLights[2].constant", 1.0f);
         ourShader.setFloat("pointLights[2].linear", 0.09);
@@ -367,23 +393,25 @@ void Render::visualise()
         ourShader.setVec3("pointLights[3].position", lightPosition[3]);
         ourShader.setVec3("pointLights[3].ambient", 0.15f, 0.15f, 0.15f);
         ourShader.setVec3("pointLights[3].diffuse", 0.8f, 0.8f, 0.8f);
+
         ourShader.setVec3("pointLights[3].specular", 1.0f, 1.0f, 1.0f);
         ourShader.setFloat("pointLights[3].constant", 0.01f);
         ourShader.setFloat("pointLights[3].linear", 0.0004);
         ourShader.setFloat("pointLights[3].quadratic", 0.0013);
+
 
         ourShader.Bind();
 
         // Transformation matrices
         // -----------------------
         glm::mat4 projection(1);
-         projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-         glm::mat4 view(1);
-         view = camera.GetViewMatrix();
-         ourShader.setMat4("projection", projection);
-         ourShader.setMat4("view", view);
+        projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 view(1);
+        view = camera.GetViewMatrix();
+        ourShader.setMat4("projection", projection);
+        ourShader.setMat4("view", view);
 
-       
+
 
         //Draw the models
         ourShader.setMat4("projection", projection);
@@ -392,44 +420,34 @@ void Render::visualise()
         {
             glm::mat4 modelObject = glm::mat4(1.0f);
             modelObject = glm::translate(modelObject, modelPosition[i]); // Translate it down a bit so it's at the center of the scene
-            
-            modelObject = glm::rotate(modelObject, glm::radians((float)modelAngle[i]), glm::vec3(0.0f, 1.0f, 0.0f));
-            modelObject = glm::scale(modelObject, glm::vec3(4.0f, 4.0f, 4.0f)); 
+
+            modelObject = glm::rotate(modelObject, glm::radians((float)modelAngle[i]), glm::vec3(1.0f, 0.3f, 0.5f));
+            modelObject = glm::scale(modelObject, glm::vec3(4.0f, 4.0f, 4.0f));
             ourShader.setMat4("model", modelObject);
             models[i].Draw(ourShader);
-            
+
         }
-        
+
 
         //light objects
-        for (unsigned int i = 0; i < 2; i++)
-        {
-            glm::mat4 model (1.0f);
-            model = glm::translate(model, lightPosition[i]);
-            model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-           
-            
-            model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f)); // a smaller cube
-            lampShader.setMat4("model", model);
-           
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
-        for (unsigned int i = 2; i < 4; i++)
+        lampShader.use();
+        lampShader.setMat4("projection", projection);
+        lampShader.setMat4("view", view);
+        glBindVertexArray(lampVAO);
+
+
+        for (unsigned int i = 0; i < 4; i++)
         {
             glm::mat4 model(1.0f);
             model = glm::translate(model, lightPosition[i]);
             model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-
-
-            
-
-            model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f)); // a smaller cube
+            model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f)); // a smaller cube
             lampShader.setMat4("model", model);
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
-        
+
 
 
         // draw skybox as last
@@ -453,7 +471,8 @@ void Render::visualise()
     }
     //All the buffers are deleted in destructor
     glDeleteVertexArrays(1, &cubeVAO);
-    glDeleteVertexArrays(1, &lightVAO);
+    glDeleteVertexArrays(1, &lampVAO);
+
     glDeleteVertexArrays(1, &skyboxVAO);
     glDeleteBuffers(1, &skyboxVBO);
     glDeleteBuffers(1, &cubeVBO);
@@ -481,7 +500,7 @@ void processInput(GLFWwindow* window)
         camera.ProcessKeyboard(UP, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
         camera.ProcessKeyboard(DOWN, deltaTime);
-    
+
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
