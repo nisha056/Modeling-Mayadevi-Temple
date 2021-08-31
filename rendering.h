@@ -1,4 +1,3 @@
-
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -28,11 +27,9 @@ private:
     vector<glm::vec3> modelScale;
     vector<double> modelAngle;
     vector<Model> models;
-    vector<glm::vec3> lampPosition;
+    
     vector<glm::vec3> lightPosition;
-    double w;
-    double l;
-    double h;
+    
 
 public:
     Render(Object* temple);
@@ -214,11 +211,7 @@ void Render::initializeGlfw()
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
 
-    // tell GLFW to capture our mouse
-    //once the application has focus, the mouse cursor stays within the center of the window
-    //        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-    // glad: load all OpenGL function pointers
+    
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         std::cout << "Failed to initialize GLAD" << std::endl;
@@ -226,24 +219,14 @@ void Render::initializeGlfw()
 
     glEnable(GL_DEPTH_TEST);
 
-    cout << "WINDOW CREATED!" << endl;
+   
 }
 
 
 
 void Render::initializeVertex()
 {
-    // send vertices as input to the first process of the graphics pipeline:
-    //the vertex shader and we manage this memory by VBO and it has an unique ID
-    //using the glGenBuffers
-    //LINKING VERTEX ATTRIBUTES
-
-    //tell OpenGL how it should interpret the vertex data
-    //(per vertex attribute) using glVertexAttribPointer:
-
-    //Core OpenGL requires that we use a VAO so it knows what to do
-    //with our vertex inputs. If we fail to bind a VAO, OpenGL
-    //will most likely refuse to draw anything.
+    
     glGenVertexArrays(1, &cubeVAO);
     glGenBuffers(1, &cubeVBO);
 
@@ -268,23 +251,10 @@ void Render::initializeVertex()
     glEnableVertexAttribArray(0);
 
 
-
-
-
-
-
-
-
-
-
-
-
-
     // lamp VAO
     glGenVertexArrays(1, &lampVAO);
     glBindVertexArray(lampVAO);
     glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
-    // note that we update the lamp's position attribute's stride to reflect the updated buffer data
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
@@ -294,10 +264,9 @@ void Render::initializeVertex()
 
 void Render::setLightPosition()
 {
-    lightPosition.push_back(glm::vec3(0.7, 0.2, 2));
-    lightPosition.push_back(glm::vec3(4.3, -5.3, -4));
-
-    lightPosition.push_back(glm::vec3(-5, 2, 5));
+    lightPosition.push_back(glm::vec3(-1, 0.3, -2));
+    lightPosition.push_back(glm::vec3(-3.3, 0.3, -2));
+    lightPosition.push_back(glm::vec3(-7.3, -0.4, -2));
     lightPosition.push_back(glm::vec3(0, 0, 40));
 }
 
@@ -308,13 +277,11 @@ void Render::visualise()
 
     initializeGlfw();
 
-    // build and compile shaders
-    // -------------------------
+    // building  and compiling shaders
     Shader ourShader("vertexmain.vs", "fragmentmain.fs");    //Lightning Shader
     Shader lampShader("lightvertex.vs", "lightfragment.fs"); //Light Shader
     Shader skyboxShader("skybox.vs", "skybox.fs");           //CubeMap Shader
 
-    //setLampPosition();
     setLightPosition();
 
     //initiliaze vertex
@@ -365,7 +332,7 @@ void Render::visualise()
         ourShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
         ourShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
         // point light 1
-        ourShader.setVec3("pointLights[0].position", lightPosition[0]);
+        ourShader.setVec3("pointLights[0].position", glm::vec3(-1, 0.3, -2));
         ourShader.setVec3("pointLights[0].ambient", 0.05f, 0.05f, 0.05f);
         ourShader.setVec3("pointLights[0].diffuse", 0.8f, 0.8f, 0.8f);
         ourShader.setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
@@ -373,7 +340,7 @@ void Render::visualise()
         ourShader.setFloat("pointLights[0].linear", 0.09);
         ourShader.setFloat("pointLights[0].quadratic", 0.032);
         // point light 2
-        ourShader.setVec3("pointLights[1].position", lightPosition[1]);
+        ourShader.setVec3("pointLights[1].position", glm::vec3(-3.3, 0.3, -2));
         ourShader.setVec3("pointLights[1].ambient", 0.05f, 0.05f, 0.05f);
         ourShader.setVec3("pointLights[1].diffuse", 0.8f, 0.8f, 0.8f);
         ourShader.setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
@@ -381,7 +348,7 @@ void Render::visualise()
         ourShader.setFloat("pointLights[1].linear", 0.09);
         ourShader.setFloat("pointLights[1].quadratic", 0.032);
         // point light 3
-        ourShader.setVec3("pointLights[2].position", lightPosition[2]);
+        ourShader.setVec3("pointLights[2].position", glm::vec3(-7.3, -0.4, -2));
         ourShader.setVec3("pointLights[2].ambient", 0.05f, 0.05f, 0.05f);
         ourShader.setVec3("pointLights[2].diffuse", 1.0f, 1.0f, 0.5f);
 
@@ -390,7 +357,7 @@ void Render::visualise()
         ourShader.setFloat("pointLights[2].linear", 0.09);
         ourShader.setFloat("pointLights[2].quadratic", 0.032);
         // // point light 4
-        ourShader.setVec3("pointLights[3].position", lightPosition[3]);
+        ourShader.setVec3("pointLights[3].position", glm::vec3(0, 0, 40));
         ourShader.setVec3("pointLights[3].ambient", 0.15f, 0.15f, 0.15f);
         ourShader.setVec3("pointLights[3].diffuse", 0.8f, 0.8f, 0.8f);
 
@@ -451,7 +418,7 @@ void Render::visualise()
 
 
         // draw skybox as last
-        glDepthFunc(GL_LEQUAL); // change depth function so depth test passes when values are equal to depth buffer's content
+        glDepthFunc(GL_LEQUAL); 
         skyboxShader.Bind();
         view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix
         skyboxShader.setMat4("view", view);
@@ -463,9 +430,6 @@ void Render::visualise()
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
         glDepthFunc(GL_LESS); // set depth function back to default
-
-        // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-        // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
@@ -476,13 +440,11 @@ void Render::visualise()
     glDeleteVertexArrays(1, &skyboxVAO);
     glDeleteBuffers(1, &skyboxVBO);
     glDeleteBuffers(1, &cubeVBO);
-    cout << "Deleted Buffers successfully" << endl;
+    
 
     glfwTerminate();
 }
 
-// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-// ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -503,17 +465,15 @@ void processInput(GLFWwindow* window)
 
 }
 
-// glfw: whenever the window size changed (by OS or user resize) this callback function executes
-// ---------------------------------------------------------------------------------------------
+// glfw: this callback function executes whenever the window size is changed
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-    // make sure the viewport matches the new window dimensions; note that width and
-    // height will be significantly larger than specified on retina displays.
+    // confirming the viewport matches the new window dimensions
+    
     glViewport(0, 0, width, height);
 }
 
-// glfw: whenever the mouse moves, this callback is called
-// -------------------------------------------------------
+
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
     if (firstMouse)
@@ -532,8 +492,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
-// glfw: whenever the mouse scroll wheel scrolls, this callback is called
-// ----------------------------------------------------------------------
+
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     camera.ProcessMouseScroll(yoffset);
